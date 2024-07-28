@@ -1,21 +1,37 @@
 import logo from './logo.svg';
 import './App.css';
-import {Button, Nav} from 'react-bootstrap'
+import {Button, Nav, Navbar, Container} from 'react-bootstrap'
 
 function App() {
   return (
     <div className="App">
-      <Nav defaultActiveKey="/home" as="ul">
-        <Nav.Item as="li">
-          <Nav.Link href="/home">Active</Nav.Link>
-        </Nav.Item>
-        <Nav.Item as="li">
-          <Nav.Link eventKey="link-1">Link</Nav.Link>
-        </Nav.Item>
-        <Nav.Item as="li">
-          <Nav.Link eventKey="link-2">Link</Nav.Link>
-        </Nav.Item>
-      </Nav>
+      <Navbar expand="lg" className="bg-body-tertiary">
+        <Container>
+          <Navbar.Brand href="/">영어 발음 테스트</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="me-auto">
+              <Nav.Item>
+                <Nav.Link href="/statistic">통계</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link href="/mypage" className="transparent">마이페이지</Nav.Link>
+              </Nav.Item>
+            </Nav>
+            <Nav className="ml-auto">
+              <Nav.Item>
+                <Nav.Link href="/login">로그인</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link href="/register">회원가입</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Button className="transparent">로그아웃</Button>
+              </Nav.Item>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
     </div>
   );
 }
