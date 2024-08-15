@@ -6,6 +6,7 @@ import {lazy, Suspense} from 'react';
 
 const Login = lazy(() => import('./routes/Login.js'))
 const Register = lazy(() => import('./routes/Register.js'))
+const Test = lazy(() => import('./routes/Test.js'))
 
 function App() {
   let navigate = useNavigate();
@@ -51,7 +52,11 @@ function App() {
             </div>
           </>
         } />
-        {/* <Route path='/test' element={<Test/>}/> */}
+        <Route path='/test' element={
+          <Suspense fallback={<div>로딩중임</div>}>
+            <Test />
+          </Suspense>
+        }/>
         <Route path='/login' element={
           <Suspense fallback={<div>로딩중임</div>}>
             <Login />
