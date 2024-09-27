@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function Test(){
     const [recording, setRecording] = useState(false)
@@ -8,11 +9,35 @@ function Test(){
     const [mediaRecorder, setMediaRecorder] = useState(null)
     const [audioBlob, setAudioBlob] = useState(null)
     let [count, setCount] = useState(0);
-    let [words, setWords] = useState(['aviation', 'evaluate', 'entity', 'some', 'truth']);
-    let [word, setWord] = useState(words[count])
+    let [words, setWords] = useState([]);
+    let [word, setWord] = useState('')
     let [modal, setModal] = useState(false)
-    let [results, setResults] = useState([4.00, 3.65, 2.71, 5.00, 4.24])
+    let [results, setResults] = useState([])
+    let [isResult, setIsResult] = useState(false)
+    let [score, setScore] = useState(0)
+
+
+    const getWords = async () => {
+        const res = await axios.get('http://localhost:8080/words')
+        const arr = res.data.words
+        let temp = []
+        for (let i = 0; i < arr.length; i++){
+            temp.push(arr[i].word)
+        }
+        console.log(temp)
+        setWords([...temp])
+    }
     
+    useEffect(() => {
+        getWords()
+    }, [])
+    
+    useEffect(() => {
+        if (words.length > 0) {
+            setWord(words[count])
+        }
+    }, [words, count])
+
     const StartRecording = () => {
         navigator.mediaDevices.getUserMedia({audio: true})
           .then((stream) => {
@@ -36,6 +61,22 @@ function Test(){
         mediaRecorder.stop()
         setRecording(false)
     }
+
+    const handleSubmit = async () => {
+        const formData = new FormData()
+        formData.append('file', audioBlob, 'recording.wav')
+        formData.append('word', word)
+
+        const res = await axios.post('http://localhost:8080/test', formData, {
+            headers : {
+                "Content-Type" : "multipart/form-data"
+            }
+        })
+
+        console.log(res.data.score)
+        setIsResult(true)
+        setScore(res.data.score)
+    }
     
     return(
         <div>
@@ -48,6 +89,8 @@ function Test(){
                 <div>
                     <p>녹음 결과</p>
                     <audio controls src={audioURL}></audio>
+                    <button onClick={() => {handleSubmit()}}>제출</button>
+                    {isResult && <p>{score}</p>}
                 </div>
             )}
             <br />
