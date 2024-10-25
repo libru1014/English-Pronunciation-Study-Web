@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -11,21 +11,26 @@ function Test(){
     let [count, setCount] = useState(0);
     let [words, setWords] = useState([]);
     let [word, setWord] = useState('')
-    let [modal, setModal] = useState(false)
     let [results, setResults] = useState([])
     let [isResult, setIsResult] = useState(false)
     let [score, setScore] = useState(0)
+    let [len, setLen] = useState(0)
+    let [recog, setRecog] = useState('')
+    let [end, setEnd] = useState(false)
+    let [nums, setNums] = useState([])
 
+    let navigate = useNavigate()
 
     const getWords = async () => {
-        const res = await axios.get('http://localhost:8080/words')
+        const res = await axios.get('/words', {withCredentials : true})
         const arr = res.data.words
+        setNums(res.data.nums)
         let temp = []
         for (let i = 0; i < arr.length; i++){
             temp.push(arr[i].word)
         }
-        console.log(temp)
-        setWords([...temp])
+        setWords(temp)
+        setLen(temp.length)
     }
     
     useEffect(() => {
@@ -67,57 +72,71 @@ function Test(){
         formData.append('file', audioBlob, 'recording.wav')
         formData.append('word', word)
 
-        const res = await axios.post('http://localhost:8080/test', formData, {
-            headers : {
-                "Content-Type" : "multipart/form-data"
-            }
-        })
+        try {
+            const res = await axios.post('/test', formData, {
+                headers : {
+                    "Content-Type" : "multipart/form-data"
+                }
+            })
+    
+            setIsResult(true)
+            setScore(res.data.score)
+            setRecog(res.data.recognized)
+        } catch (error) {
+            console.log(error)
+        }
+        
+    }
 
-        console.log(res.data.score)
-        setIsResult(true)
-        setScore(res.data.score)
+    const submit = async () => {
+        await axios.post('/result', {scores : results, nums: nums}, {withCredentials : true})
+          .then(response => {
+            if (response.status == 200) {
+                window.location.href = '/'
+            }
+          })
+          .catch(error => {
+            alert(error)
+          })
     }
     
     return(
-        <div>
-            <p>문제 {count + 1}번</p>
-            <p>{word}</p>
-            <button onClick={recording ? stopRecording : StartRecording}>
-                {recording ? "정지" : "녹음"}
-            </button>
-            {audioURL && (
-                <div>
-                    <p>녹음 결과</p>
-                    <audio controls src={audioURL}></audio>
-                    <button onClick={() => {handleSubmit()}}>제출</button>
-                    {isResult && <p>{score}</p>}
-                </div>
-            )}
-            <br />
-            {count == words.length - 1 ? <button onClick={() => {setModal(true)}}>결과</button> : <button onClick={() => {
-                let t = count
-                setCount(count + 1)
-                setWord(words[t + 1])
-            }}>다음</button>}
-
-            {modal && <Modal results={results} words={words}/>}
-        </div>
-    )
-}
-
-function Modal(props){
-    let navigate = useNavigate()
-    
-    return(
-        <div className="mt-3">
-            {
-                props.results.map(function(a, i){
-                    return(
-                        <p>{props.words[i]}의 점수 : {a}</p>
-                    )
-                })
+        <div className='test mt-5'>
+            {end ? 
+            <Button variant="success" onClick={() => {submit()}}>제출</Button> 
+            :
+            <div>
+                <p>문제 {count + 1} / {len}</p>
+                <p>{word}</p>
+                <Button variant="success" onClick={recording ? stopRecording : StartRecording}>
+                    {recording ? "정지" : "녹음"}
+                </Button>
+                {audioURL && (
+                    <div className='mt-3'>
+                        <p>녹음 결과</p>
+                        <audio controls src={audioURL}></audio>
+                        <br />
+                        {!isResult && <Button variant="success" onClick={() => {handleSubmit()}} className='mt-2'>제출</Button>}
+                        {isResult && <p className='mt-2'>점수: {score} <br /> AI가 인식한 발음: {recog}</p>}
+                    </div>
+                )}
+                <br />
+                {isResult && (
+                <Button variant="success" onClick={() => {
+                    let copy = [...results, score]
+                    setResults(copy)
+                    setAudioURL(null)
+                    setIsResult(false)
+                    if (count == words.length - 1){
+                        setEnd(true)
+                    } else {
+                        let t = count
+                        setCount(count + 1)
+                        setWord(words[t + 1])
+                    }
+                }} className='mt-3'>다음</Button>)}
+            </div>
             }
-            <button onClick={() => {navigate('/')}}>메인 페이지</button>
         </div>
     )
 }

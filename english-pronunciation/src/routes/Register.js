@@ -61,16 +61,21 @@ function Register(){
             event.preventDefault();
             event.stopPropagation();
         } else {
-            axios.post('http://localhost:8080/register', {'username' : id, 'password' : pwd})
+            axios.post('/register', {'username' : id, 'password' : pwd})
             .then(
                 (res) => {
                     if (res.status == 0){
                         setValidId(true)
                         setErrorId(idError.exist_id)
                         alert("입력한 아이디가 이미 존재합니다.")
+                    } else if (res.status == 200) {
+                        window.location.href = '/'
                     }
                 }
             )
+            .catch(error => {
+                alert(error)
+            })
         }
 
         setValidated(true);
@@ -80,7 +85,7 @@ function Register(){
     
     return(
         <div>
-            <Form noValidate validated={validated} onSubmit={handleSubmit}>
+            <Form noValidate validated={validated} onSubmit={handleSubmit} className='forms mt-5'>
                 <h1>회원가입</h1>
                 <Form.Group controlId="validationUsername">
                     <Form.Label>아이디</Form.Label>
@@ -94,7 +99,7 @@ function Register(){
                         {errorId}
                     </Form.Control.Feedback>
                 </Form.Group>
-                <Form.Group controlId="validationPassword">
+                <Form.Group controlId="validationPassword" className='mt-3'>
                     <Form.Label>비밀번호</Form.Label>
                     <Form.Control className = {`${validPwd ? 'is-invalid' : ''}`}
                       onChange={handlePwd}
@@ -106,7 +111,7 @@ function Register(){
                         {errorPwd}
                     </Form.Control.Feedback>
                 </Form.Group>
-                <Form.Group controlId="validationPasswordCheck">
+                <Form.Group controlId="validationPasswordCheck" className='mt-3'>
                     <Form.Label>비밀번호 확인</Form.Label>
                     <Form.Control className = {`${validCheck ? 'is-invalid' : ''}`}
                       onChange={handleCheck}
@@ -118,7 +123,7 @@ function Register(){
                         비밀번호와 일치하지 않습니다.
                     </Form.Control.Feedback>
                 </Form.Group>
-                <Button type="submit">회원가입</Button>
+                <Button type="submit" className='mt-3'>회원가입</Button>
             </Form>
         </div>
     )

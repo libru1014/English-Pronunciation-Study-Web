@@ -40,3 +40,29 @@
 .transparent {
   display: none;
 }
+
+.forms {
+  width: 50%;
+  margin: auto;
+  border: 1px solid skyblue;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.tables {
+  width: 50%;
+  margin: auto;
+}
+
+.ex {
+  width: 50%;
+  margin: auto;
+  border: 1px solid red;
+}
+
+.test {
+  width: 50%;
+  margin: auto;
+  border: 1px solid green;
+  padding: 20px;
+}

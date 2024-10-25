@@ -1,7 +1,7 @@
 import { Form, Button } from 'react-bootstrap';
 import {useState} from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import googleimg from '../web_light_rd_SI@1x.png'
 
 const idError = {
     'empty' : '아이디를 입력해주세요.',
@@ -23,9 +23,6 @@ function Login(){
     const [errorId, setErrorId] = useState(idError.empty)
     const [errorPwd, setErrorPwd] = useState(pwdError.empty)
 
-    const [status, setStatus] = useState(400)
-    const [isStatus, setIsStatus] = useState(false)
-
     const handleId = (e) => {
         setId(e.target.value)
         setValidId(false)
@@ -46,8 +43,15 @@ function Login(){
             event.stopPropagation();
         } else {
             try {
-                const res = await axios.post('http://localhost:8080/login', {'username' : id, 'password' : pwd}, {withCredentials : true})
-                console.log(res.status)
+                await axios.post('/login', {'username' : id, 'password' : pwd}, {withCredentials : true})
+                  .then(response => {
+                    if (response.status == 200) {
+                        window.location.href = '/'
+                    }
+                  })
+                  .catch(error => {
+                    alert("아이디가 없거나 잘못된 비밀번호를 입력하셨습니다.")
+                  })
             } catch (error) {
                 console.log(error)
             }
@@ -55,10 +59,14 @@ function Login(){
 
         setValidated(true);
     };
+
+    const handleGoogleLogin = () => {
+        window.location.href = '/auth/google'
+    }
     
     return(
         <div>
-            <Form noValidate validated={validated} onSubmit={handleSubmit}>
+            <Form noValidate validated={validated} onSubmit={handleSubmit} className='forms mt-5'>
                 <h1>로그인</h1>
                 <Form.Group controlId="validationUsername">
                     <Form.Label>아이디</Form.Label>
@@ -72,7 +80,7 @@ function Login(){
                         {errorId}
                     </Form.Control.Feedback>
                 </Form.Group>
-                <Form.Group controlId="validationPassword">
+                <Form.Group controlId="validationPassword" className='mt-3'>
                     <Form.Label>비밀번호</Form.Label>
                     <Form.Control className = {`${validPwd ? 'is-invalid' : ''}`}
                       onChange={handlePwd}
@@ -84,9 +92,9 @@ function Login(){
                         {errorPwd}
                     </Form.Control.Feedback>
                 </Form.Group>
-                <Button type="submit">로그인</Button>
-                {isStatus ? <p>{status}</p> : null}
+                <Button type="submit" className='mt-3'>로그인</Button>
             </Form>
+            <img src={googleimg} onClick={handleGoogleLogin} className='mt-3'/>
         </div>
     )
 }
